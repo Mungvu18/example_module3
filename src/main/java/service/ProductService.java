@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -38,7 +39,22 @@ public class ProductService implements IProductService{
 
     @Override
     public boolean save(Product product) {
-        return false;
+        Boolean test = false;
+        Connection connection = ConnectionJDBC.getConnection();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO product VALUES (?,?,?,?,?,?,?)");
+            preparedStatement.setString(2, product.getName());
+            preparedStatement.setInt(1,product.getId());
+            preparedStatement.setDouble(3,product.getPrice());
+            preparedStatement.setInt(4,product.getAmount());
+            preparedStatement.setString(5,product.getColor());
+            preparedStatement.setString(6,product.getDescription());
+            preparedStatement.setString(7,product.getCategory_name());
+            test = preparedStatement.executeUpdate() > 0;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return test;
     }
 
     @Override

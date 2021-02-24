@@ -59,7 +59,22 @@ public class ProductService implements IProductService{
 
     @Override
     public boolean update(Product product, int id) {
-        return false;
+        Boolean test = false;
+        Connection connection = ConnectionJDBC.getConnection();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("update product set name = ?, price = ?, amount = ?, color = ?, description = ?, category_name = ? where id = ?");
+            preparedStatement.setString(1, product.getName());
+            preparedStatement.setInt(7,product.getId());
+            preparedStatement.setDouble(2,product.getPrice());
+            preparedStatement.setInt(3,product.getAmount());
+            preparedStatement.setString(4,product.getColor());
+            preparedStatement.setString(5,product.getDescription());
+            preparedStatement.setString(6,product.getCategory_name());
+            test = preparedStatement.executeUpdate() > 0;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return test;
     }
 
     @Override

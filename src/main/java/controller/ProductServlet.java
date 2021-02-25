@@ -1,6 +1,8 @@
 package controller;
 
+import model.Category;
 import model.Product;
+import service.CategoryService;
 import service.ProductService;
 
 import javax.servlet.RequestDispatcher;
@@ -15,8 +17,53 @@ import java.util.List;
 @WebServlet(name = "ProductServlet", urlPatterns = "/product")
 public class ProductServlet extends HttpServlet {
     ProductService productService = new ProductService();
+    CategoryService categoryService = new CategoryService();
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if(action == null){
+            action = "";
+        }
+        switch (action){
+            case "create":
+                createProduct(request,response);
+                break;
+            case "edit":
+                editProduct(request,response);
+                break;
+        }
+    }
 
+    private void editProduct(HttpServletRequest request, HttpServletResponse response) {
+        String name = request.getParameter("name");
+        Double price = Double.parseDouble(request.getParameter("price"));
+        int amount = Integer.parseInt(request.getParameter("amount"));
+        String color = request.getParameter("color");
+        String description = request.getParameter("description");
+        String category_name = request.getParameter("category_name");
+        int id = Integer.parseInt(request.getParameter("id"));
+        Product product = new Product(id,name,price,amount,color,description,category_name);
+        productService.update(product,id);
+        try {
+            response.sendRedirect("/product");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createProduct(HttpServletRequest request, HttpServletResponse response) {
+        String name =request.getParameter("name");
+        Double price = Double.parseDouble(request.getParameter("price"));
+        int amount = Integer.parseInt(request.getParameter("amount"));
+        String color = request.getParameter("color");
+        String description = request.getParameter("description");
+        String category_id = request.getParameter("category_name");
+        Product product = new Product (name,price,amount,color,description,category_id);
+        productService.save(product);
+        try {
+            response.sendRedirect("/product");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -28,6 +75,51 @@ public class ProductServlet extends HttpServlet {
             case "":
                 showAllProduct(request,response);
                 break;
+            case "create":
+                showCreatProduct(request,response);
+                break;
+            case "edit":
+                showEditProduct(request,response);
+                break;
+            case "delete":
+                deleteProduct(request,response);
+        }
+    }
+
+    private void deleteProduct(HttpServletRequest request, HttpServletResponse response) {
+        int id = Integer.parseInt(request.getParameter("id"));
+        productService.delete(id);
+        try {
+            response.sendRedirect("/product");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showEditProduct(HttpServletRequest request, HttpServletResponse response) {
+        int id = Integer.parseInt(request.getParameter("id"));
+        Product product = productService.findById(id);
+        request.setAttribute("o",product);
+        List<Category> categories = categoryService.fillAll();
+        request.setAttribute("categories",categories);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("Edit.jsp");
+        try {
+            dispatcher.forward(request,response);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showCreatProduct(HttpServletRequest request, HttpServletResponse response) {
+        RequestDispatcher dispatcher = request.getRequestDispatcher("Create.jsp");
+        try {
+            dispatcher.forward(request,response);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
